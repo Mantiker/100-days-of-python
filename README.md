@@ -1,6 +1,6 @@
 ### 100 days of Python
 
-In this repo I collected finished tasks from course ["100 Days of Code: The Complete Python Pro Bootcamp"](https://www.udemy.com/course/100-days-of-code/).
+In this repo I collected my finished tasks from course ["100 Days of Code: The Complete Python Pro Bootcamp"](https://www.udemy.com/course/100-days-of-code/).
 
 It was done in studying purposes.
 
