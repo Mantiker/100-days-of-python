@@ -15,11 +15,14 @@ for item in data_manager.destination_data:
 pprint(data_manager.destination_data, width=120)
 
 for item in data_manager.destination_data:
-    flight_data = FlightData()
-    flight_data.destination_city = item["city"]
-    flight_data.destination_airport_code = item["iataCode"]
+    flight_data = FlightData(destination_airport_code=item["iataCode"], destination_city=item["city"])
 
-    data = flight_search.search(flight_data)
+    flight_search.search(flight_data)
 
-    flight_data.price = 0
+    print(f"{flight_data.destination_city}: €{flight_data.price}")
+
+    if flight_data.price < int(item["lowestPrice"]):
+        print(f"Low price alert!Only €{flight_data.price} to fly from {flight_data.departure_city}-{flight_data.departure_airport_code}"
+              f" to {flight_data.destination_city}-{flight_data.destination_airport_code},"
+              f" from {flight_data.departure_date.strftime('%Y-%m-%d')} to {flight_data.destination_date.strftime('%Y-%m-%d')}")
 
