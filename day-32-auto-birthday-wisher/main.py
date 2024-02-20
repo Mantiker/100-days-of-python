@@ -28,7 +28,7 @@ if (today_month, today_day) in birthdays_dict:
 
         print(letter)
 
-    # TODO: send a mail as in quotes.py - next to this file
+    # TODO: send a mail as in quotes_sender.py - next to this file
 
 
 
