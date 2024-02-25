@@ -7,7 +7,7 @@ It was done in studying purposes.
 The steps for completing course:
 1) check the theory
 2) get the task
-3) resolve the task by me independently
+3) resolve the task by me independently (if I was experienced in that topic I can only practice a bit)
 4) recheck how it was done in course and make fixes if it needed
 
 Tasks were done exactly how they expected to be done in course.
