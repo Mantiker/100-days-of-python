@@ -17,6 +17,8 @@ pip3 install -r requirements.txt
 This will install the packages from requirements.txt for this project.
 '''
 
+REPORT_CLOSED_SECRET = "TopSecretAPIKey"
+
 app = Flask(__name__)
 app.json.sort_keys = False
 
@@ -55,12 +57,12 @@ with app.app_context():
 
 @app.route("/")
 def home():
-    return render_template("index.html")
+    return render_template("index.html"), 200
 
 @app.route("/random", methods=["GET"])
 def get_random_cafe():
     random_cafe = db.session.execute(db.select(Cafe).order_by(db.sql.func.random()).limit(1)).scalar()
-    return jsonify(cafe=random_cafe.to_dict())
+    return jsonify(cafe=random_cafe.to_dict()), 200
 
 
 # HTTP GET - Read Record
@@ -68,7 +70,7 @@ def get_random_cafe():
 def all_cafes():
     cafes = db.session.execute(db.select(Cafe).order_by(Cafe.id)).scalars().all()
 
-    return jsonify(cafes=[cafe.to_dict() for cafe in cafes])
+    return jsonify(cafes=[cafe.to_dict() for cafe in cafes]), 200
 
 
 @app.route("/cafes/search", methods=["GET"])
@@ -76,18 +78,63 @@ def cafe_search():
     query_location = request.args.get("loc")
     cafes = db.session.execute(db.select(Cafe).where(Cafe.location==query_location)).scalars().all()
     if cafes:
-        return jsonify(cafes=[cafe.to_dict() for cafe in cafes])
+        return jsonify(cafes=[cafe.to_dict() for cafe in cafes]), 200
     else:
         return jsonify(Error={"error": {
             "Not found": "Sorry, we don't have a cafe at that location."
-        }})
+        }}), 404
 
 
 # HTTP POST - Create Record
+@app.route("/cafes", methods=["POST"])
+def add_cafe():
+    new_cafe = Cafe(
+        name=request.form.get("name"),
+        map_url=request.form.get("map_url"),
+        img_url=request.form.get("img_url"),
+        location=request.form.get("loc"),
+        has_sockets=bool(request.form.get("sockets")),
+        has_toilet=bool(request.form.get("toilet")),
+        has_wifi=bool(request.form.get("wifi")),
+        can_take_calls=bool(request.form.get("calls")),
+        seats=request.form.get("seats"),
+        coffee_price=request.form.get("coffee_price"),
+    )
+
+    db.session.add(new_cafe)
+    db.session.commit()
+    return jsonify(response={"success": "Successfully added the new cafe."}), 200
+
 
 # HTTP PUT/PATCH - Update Record
+@app.route("/cafes/<int:id>/update-price", methods=["PATCH"])
+def patch_cafe(cafe_id):
+    new_price = request.args.get("new_price")
+    cafe = db.session.get(Cafe, cafe_id)
+
+    if cafe:
+        cafe.coffee_price = new_price
+        db.session.commit()
+        return jsonify(response={"success": "Successfully updated the price."}), 200
+    else:
+        return jsonify(error={"Not Found": "Sorry a cafe with that id was not found in the database."}), 404
+
 
 # HTTP DELETE - Delete Record
+@app.route("/cafes/<int:id>/report-closed")
+def report_closed(cafe_id):
+    api_key = request.args.get("api-key")
+    if api_key == REPORT_CLOSED_SECRET:
+        cafe = db.session.get(Cafe, cafe_id)
+
+        if cafe:
+            db.session.delete(cafe)
+            db.session.commit()
+            return jsonify(response={"success": "Successfully deleted the cafe from the database."}), 200
+        else:
+            return jsonify(error={"Not Found": "Sorry a cafe with that id was not found in the database."}), 404
+    else:
+        return jsonify(error={"Forbidden": "Sorry, that's not allowed. Make sure you have the correct api_key."}), 403
 
 
 if __name__ == '__main__':
